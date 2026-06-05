@@ -117,6 +117,7 @@ export default function Home() {
   }, []);
 
   // Show result modal when match ends
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     if (matchState.matchOver) setShowResult(true);
   }, [matchState.matchOver]);
