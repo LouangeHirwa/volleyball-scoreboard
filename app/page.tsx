@@ -76,7 +76,7 @@ export default function Home() {
   const [authLoading, setAuthLoading] = useState(true);
   const [matchState, setMatchState] = useState<MatchState>(DEFAULT_STATE);
   const [showAuth, setShowAuth] = useState(false);
-  const [showResult, setShowResult] = useState(false);
+  const [resultDismissed, setResultDismissed] = useState(false);
   const resultCardRef = useRef<HTMLDivElement>(null);
 
   // ── Auth listener ────────────────────────────────────────────────────────
@@ -116,11 +116,6 @@ export default function Home() {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  // Show result modal when match ends
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => {
-    if (matchState.matchOver) setShowResult(true);
-  }, [matchState.matchOver]);
 
   // ── Scoring actions (editor only) ────────────────────────────────────────
   const addPoint = useCallback((team: "A" | "B") => {
@@ -187,7 +182,7 @@ export default function Home() {
     };
     setMatchState(next);
     pushState(next);
-    setShowResult(false);
+    setResultDismissed(false);
   }, [matchState.teamA, matchState.teamB]);
 
   // ── Export image ─────────────────────────────────────────────────────────
@@ -212,6 +207,7 @@ export default function Home() {
   }
 
   // ── Derived ───────────────────────────────────────────────────────────────
+  const showResult = matchState.matchOver && !resultDismissed;
   const target = TARGET(matchState.currentSet);
   const matchWinner = matchState.matchOver
     ? matchState.setsA === 3 ? matchState.teamA : matchState.teamB
@@ -327,9 +323,9 @@ export default function Home() {
       )}
 
       {/* Reopen result */}
-      {matchState.matchOver && !showResult && (
+      {matchState.matchOver && resultDismissed && (
         <button
-          onClick={() => setShowResult(true)}
+          onClick={() => setResultDismissed(false)}
           className="text-sm px-5 py-2 rounded-full bg-emerald-700 hover:bg-emerald-600 transition-colors font-semibold"
         >
           🏆 View Result
@@ -348,7 +344,7 @@ export default function Home() {
           exporting={exporting}
           onExport={exportImage}
           onNewMatch={resetMatch}
-          onClose={() => setShowResult(false)}
+          onClose={() => setResultDismissed(true)}
         />
       )}
     </div>
